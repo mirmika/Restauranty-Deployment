@@ -1,0 +1,84 @@
+name: Deploy to EKS
+
+on:
+  push:
+    branches:
+      - main  # Trigger on pushing to main branch
+
+jobs:
+  deploy_to_eks:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+     
+      #Get image tag
+      - name: Set IMAGE_TAG
+        run: |
+          # Try to get the latest Git tag
+          IMAGE_TAG=$(git describe --tags --abbrev=0 2>/dev/null)
+          
+          # If no tags exist, fall back to using the commit hash
+          if [ -z "$IMAGE_TAG" ]; then
+            IMAGE_TAG=$(git rev-parse --short HEAD)
+            echo "No tags found, using commit hash: $IMAGE_TAG"
+          else
+            echo "Using tag: $IMAGE_TAG"
+          fi
+          
+          # Set IMAGE_TAG for subsequent steps
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+
+
+      # Configure AWS Credentials
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      
+      # Install kubectl
+      - name: Install kubectl
+        run: |
+          curl -LO "https://dl.k8s.io/release/v1.24.0/bin/linux/amd64/kubectl"
+          chmod +x ./kubectl
+          mkdir -p $HOME/bin
+          mv ./kubectl $HOME/bin/kubectl
+          echo "$HOME/bin" >> $GITHUB_PATH
+
+      # Update kubeconfig for EKS
+      - name: Update kubeconfig for EKS
+        run: |
+          aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name ${{ secrets.AWS_CLUSTER }}
+
+      # EKS Deployment    
+      - name: Generate and Deploy to EKS
+        run: |
+         sudo apt-get update
+         sudo apt-get install -y gettext-base
+     
+         # Debug: Print IMAGE_TAG to ensure it's set correctly
+         echo "The IMAGE_TAG is: $IMAGE_TAG"
+
+         # Use envsubst to replace IMAGE_TAG in all YAML files in the k8s directory
+         for file in k8s/manifests/*.yaml; do
+         if [[ -f $file ]]; then
+         # Replace image tags in each file and create final files
+         envsubst < $file > ${file%.yaml}-final.yaml
+         echo "Processed $file"
+         fi
+         done
+
+         # Now, deploy the processed YAML files
+         for final_file in k8s/manifests/*-final.yaml; do
+         if [[ -f $final_file ]]; then
+         # Deploy each processed YAML file
+         kubectl apply -f $final_file
+         echo "Deployed $final_file"
+         fi
+         done

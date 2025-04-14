@@ -1,0 +1,40 @@
+# discounts-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: discounts
+  namespace: prometheus
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: discounts
+  template:
+    metadata:
+      labels:
+        app: discounts
+    spec:
+      containers:
+      - name: discounts
+        image: mirmika/restauranty-deployment-discounts:${IMAGE_TAG}
+        ports:
+        - containerPort: 3002
+        envFrom:
+        - secretRef:
+            name: discounts-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: restauranty-deployment-discounts-1
+  namespace: prometheus
+  labels:
+    app: discounts
+spec:
+  selector:
+    app: discounts
+  ports:
+    - name: http
+      port: 3002
+      targetPort: 3002
+  type: ClusterIP

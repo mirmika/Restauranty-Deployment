@@ -1,0 +1,40 @@
+# auth-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth
+  namespace: prometheus
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: auth
+  template:
+    metadata:
+      labels:
+        app: auth
+    spec:
+      containers:
+      - name: auth
+        image: mirmika/restauranty-deployment-auth:${IMAGE_TAG}
+        ports:
+        - containerPort: 3001
+        envFrom:
+        - secretRef:
+            name: auth-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: restauranty-deployment-auth-1
+  namespace: prometheus
+  labels:
+    app: auth 
+spec:
+  selector:
+    app: auth
+  ports:
+    - name: http
+      port: 3001
+      targetPort: 3001
+  type: ClusterIP

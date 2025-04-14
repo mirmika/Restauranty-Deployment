@@ -1,0 +1,40 @@
+# items-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: items
+  namespace: prometheus
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: items
+  template:
+    metadata:
+      labels:
+        app: items
+    spec:
+      containers:
+      - name: items
+        image: mirmika/restauranty-deployment-items:${IMAGE_TAG}
+        ports:
+        - containerPort: 3003
+        envFrom:
+        - secretRef:
+            name: items-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: restauranty-deployment-items-1
+  namespace: prometheus
+  labels:
+    app: items
+spec:
+  selector:
+    app: items
+  ports:
+    - name: http
+      port: 3003
+      targetPort: 3003
+  type: ClusterIP

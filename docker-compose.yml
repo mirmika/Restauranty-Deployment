@@ -1,0 +1,95 @@
+version: '3.8'
+
+services:
+  # Auth Microservice
+  auth:
+    build: ./restauranty/backend/auth
+    ports:
+      - "3001:3001"
+    env_file:
+      - ./restauranty/backend/auth/.env.total
+    depends_on:
+      - mongo
+      - redis
+    networks:
+      - restauranty_network
+
+  # Discounts Microservice
+  discounts:
+    build: ./restauranty/backend/discounts
+    ports:
+      - "3002:3002"
+    env_file:
+      - ./restauranty/backend/discounts/.env.total
+    depends_on:
+      - mongo
+      - redis
+    networks:
+      - restauranty_network
+
+  # Items Microservice
+  items:
+    build: ./restauranty/backend/items
+    ports:
+      - "3003:3003"
+    env_file:
+      - ./restauranty/backend/items/.env.total
+    depends_on:
+      - mongo
+      - redis
+    networks:
+      - restauranty_network
+
+  # Frontend (React Client)
+  frontend:
+    build: ./restauranty/client
+    ports:
+      - "3000:3000"
+    env_file:
+      -  ./restauranty/client/src/.env 
+    depends_on:
+      - auth
+      - discounts
+      - items
+    networks:
+      - restauranty_network
+
+  # MongoDB Database Service
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    volumes:
+      - ./data/mongo:/data/db
+    ports:
+      - "27017:27017"
+    networks:
+      - restauranty_network
+
+  # Redis Service
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - restauranty_network
+
+  # HAProxy Service
+  haproxy:
+    image: haproxy:latest
+    container_name: haproxy
+    ports:
+      - "80:80"
+    volumes:
+      - ./restauranty/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
+    depends_on:
+      - auth
+      - discounts
+      - items
+      - frontend
+    networks:
+      - restauranty_network      
+
+networks:
+  restauranty_network:
+    driver: bridge

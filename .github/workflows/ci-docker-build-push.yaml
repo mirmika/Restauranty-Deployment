@@ -1,0 +1,82 @@
+name: Build and Push Docker Images
+
+on:
+  push:
+    tags:
+      - 'v*'  # Trigger on version tags like v1.0.0  
+
+jobs:
+  build_and_push:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      # Log into Docker
+      - name: Log in to Docker
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # Extract version tag from GitHub Ref
+      - name: Extract image tag from GitHub Ref
+        id: extract_tag
+        run: |
+         # Debug: Print the GITHUB_REF
+         echo "GITHUB_REF is: $GITHUB_REF"
+    
+         # Extract the tag only if it's a tag reference
+         if [[ $GITHUB_REF == refs/tags/* ]]; then
+           IMAGE_TAG=${GITHUB_REF##*/}  # Extract tag from refs/tags/v1.0.3
+         else
+           IMAGE_TAG="latest"  # Use 'latest' as the default tag if it's not a tag reference
+         fi
+    
+         # Set IMAGE_TAG to be available for subsequent steps
+         echo "IMAGE_TAG=${IMAGE_TAG}" >> $GITHUB_ENV
+         echo "Using image tag: $IMAGE_TAG"  # Print the IMAGE_TAG to verify
+         
+      - name: Verify IMAGE_TAG
+        run: |
+           echo "The IMAGE_TAG is: $IMAGE_TAG"
+
+      # Build Docker images with versioned tags
+      - name: Build image for auth service
+        run: |
+          cd ./restauranty/backend/auth
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/restauranty-deployment-auth:${{ env.IMAGE_TAG }} .
+          
+      - name: Build image for discounts service
+        run: |
+          cd ./restauranty/backend/discounts
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/restauranty-deployment-discounts:${{ env.IMAGE_TAG }} .
+          
+      - name: Build image for items service
+        run: |
+          cd ./restauranty/backend/items
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/restauranty-deployment-items:${{ env.IMAGE_TAG }} .
+      
+      - name: Build image for frontend
+        run: |
+          cd ./restauranty/client
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/restauranty-deployment-frontend:${{ env.IMAGE_TAG }} .
+      
+      # Push Docker images to Docker Hub
+      - name: Push image for auth service to Docker Hub
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/restauranty-deployment-auth:${{ env.IMAGE_TAG }}
+
+      - name: Push image for discounts service to Docker Hub
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/restauranty-deployment-discounts:${{ env.IMAGE_TAG }}
+
+      - name: Push image for items service to Docker Hub
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/restauranty-deployment-items:${{ env.IMAGE_TAG }}
+
+      - name: Push image for frontend service to Docker Hub
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/restauranty-deployment-frontend:${{ env.IMAGE_TAG }}

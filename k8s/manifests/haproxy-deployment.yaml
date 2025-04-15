@@ -1,3 +1,4 @@
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -26,9 +27,9 @@ spec:
           mountPath: /etc/ssl/private/haproxy.pem
           subPath: haproxy.pem
         ports:
-        - containerPort: 80
-        - containerPort: 443
-        - containerPort: 8404
+         - containerPort: 80
+         - containerPort: 443
+         - containerPort: 8404
       volumes:
       - name: haproxy-config
         configMap:
@@ -36,3 +37,25 @@ spec:
       - name: haproxy-tls
         secret:
           secretName: haproxy-tls
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: haproxy-service
+  namespace: prometheus
+  labels:
+    app: haproxy
+spec:
+  selector:
+    app: haproxy
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+    - name: https
+      port: 443
+      targetPort: 443  
+    - name: metrics
+      port: 8404
+      targetPort: 8404
+  type: LoadBalancer

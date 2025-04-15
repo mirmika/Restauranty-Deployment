@@ -4,8 +4,6 @@ WORKDIR /app
 
 COPY package*.json ./
 
-COPY metrics.cjs ./ 
-
 ENV NODE_ENV=production
 
 RUN npm install 

@@ -82,3 +82,6 @@ jobs:
          echo "Deployed $final_file"
          fi
          done
+
+      - name: print final manifest
+        run: cat k8s/manifests/discounts-deployment-final.yaml

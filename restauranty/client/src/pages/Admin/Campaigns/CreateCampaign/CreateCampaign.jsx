@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-const url = process.env.REACT_APP_SERVER_URL ?? "/api""
+const url = process.env.REACT_APP_SERVER_URL ?? "/api";
 
 function CreateCampaign() {
     const [name, setName] = useState("");

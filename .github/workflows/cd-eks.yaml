@@ -3,7 +3,8 @@ name: Deploy to EKS
 on:
   push:
     branches:
-      - '*'
+       - main
+       - feature/**
 
 jobs:
   deploy_to_eks:

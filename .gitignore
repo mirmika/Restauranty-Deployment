@@ -1,11 +1,4 @@
 
-
-
-
-
-
-
-
 restauranty/client/node_modules
 restauranty/mobile/node_modules
 restauranty/server/node_modules
@@ -16,6 +9,7 @@ restauranty/backend/*/.env
 restauranty/backend/*/node_modules
 restauranty/mobile/.expo
 data/mongo/
+k8s/ssl/haproxy.pem
 certificate.crt
 certificate.csr
 private.key

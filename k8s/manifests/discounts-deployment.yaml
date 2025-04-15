@@ -17,6 +17,7 @@ spec:
       containers:
       - name: discounts
         image: mirmika/restauranty-deployment-discounts:${IMAGE_TAG}
+        imagePullPolicy: Always
         ports:
         - containerPort: 3002
         envFrom:

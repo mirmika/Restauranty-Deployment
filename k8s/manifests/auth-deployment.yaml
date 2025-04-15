@@ -17,6 +17,7 @@ spec:
       containers:
       - name: auth
         image: mirmika/restauranty-deployment-auth:${IMAGE_TAG}
+        imagePullPolicy: Always
         ports:
         - containerPort: 3001
         envFrom:

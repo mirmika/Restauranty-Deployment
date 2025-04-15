@@ -29,6 +29,7 @@ spec:
         ports:
          - containerPort: 80
          - containerPort: 443
+         - containerPort: 8404  # Expose metrics port
       volumes:
       - name: haproxy-config
         configMap:
@@ -36,6 +37,7 @@ spec:
       - name: haproxy-tls
         secret:
           secretName: haproxy-tls
+
 ---
 apiVersion: v1
 kind: Service
@@ -54,4 +56,7 @@ spec:
     - name: https
       port: 443
       targetPort: 443  
+    - name: stats
+      port: 8404
+      targetPort: 8404  # Expose metrics port  
   type: LoadBalancer

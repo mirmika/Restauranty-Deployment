@@ -29,7 +29,6 @@ spec:
         ports:
          - containerPort: 80
          - containerPort: 443
-         - containerPort: 8404
       volumes:
       - name: haproxy-config
         configMap:
@@ -55,7 +54,4 @@ spec:
     - name: https
       port: 443
       targetPort: 443  
-    - name: metrics
-      port: 8404
-      targetPort: 8404
   type: LoadBalancer

@@ -71,6 +71,6 @@ spec:
     matchNames:
       - prometheus
   endpoints:
-    - port: metrics
+    - port: http
       path: /metrics
       interval: 15s

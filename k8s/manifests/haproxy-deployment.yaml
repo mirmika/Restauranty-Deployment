@@ -26,6 +26,9 @@ spec:
         - name: haproxy-tls
           mountPath: /etc/ssl/private/haproxy.pem
           subPath: haproxy.pem
+        - name: haproxy-tls
+          mountPath: /etc/ssl/private/private.key
+          subPath: private.key
         ports:
          - containerPort: 80
          - containerPort: 443
@@ -35,7 +38,7 @@ spec:
           name: haproxy-config
       - name: haproxy-tls
         secret:
-          secretName: haproxy-tls
+          secretName: haproxy-ssl-secret
 ---
 apiVersion: v1
 kind: Service

@@ -13,3 +13,4 @@ k8s/ssl/
 certificate.crt
 certificate.csr
 private.key
+restauranty/haproxy.cfg

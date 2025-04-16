@@ -85,11 +85,11 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: mongo
+      app: mongo-exporter
   namespaceSelector:
     matchNames:
       - prometheus
   endpoints:
     - port: mongo-exporter
       path: /metrics
-      interval: 15s    
+      interval: 15s

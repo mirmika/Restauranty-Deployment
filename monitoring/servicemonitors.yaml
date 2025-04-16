@@ -74,3 +74,22 @@ spec:
     - port: stats
       path: /metrics
       interval: 15s
+---      
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: mongo-monitor
+  namespace: prometheus
+  labels:
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: mongo
+  namespaceSelector:
+    matchNames:
+      - prometheus
+  endpoints:
+    - port: mongo-exporter
+      path: /metrics
+      interval: 15s    

@@ -1,9 +1,10 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
-  name: mongo
+  name: mongo-statefulset
   namespace: prometheus
 spec:
+  serviceName: "mongo-service"
   replicas: 1
   selector:
     matchLabels:
@@ -14,23 +15,32 @@ spec:
         app: mongo
     spec:
       containers:
-      - name: mongo
-        image: mongo:latest
-        ports:
-        - containerPort: 27017
+        - name: mongo
+          image: mongo:latest
+          ports:
+            - containerPort: 27017
+          volumeMounts:
+            - name: mongo-data
+              mountPath: /data/db
+  volumeClaimTemplates:
+    - metadata:
+        name: mongo-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: ebs-sc
+        resources:
+          requests:
+            storage: 5Gi
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: mongo
+  name: mongo-service
   namespace: prometheus
-  labels:
-    app: mongo
 spec:
+  ports:
+    - port: 27017
+      targetPort: 27017
+  clusterIP: None
   selector:
     app: mongo
-  ports:
-    - name: http
-      port: 27017
-      targetPort: 27017
-  type: ClusterIP

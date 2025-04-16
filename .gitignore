@@ -14,3 +14,6 @@ certificate.crt
 certificate.csr
 private.key
 restauranty/haproxy.cfg
+secrets/
+configmaps/
+data/

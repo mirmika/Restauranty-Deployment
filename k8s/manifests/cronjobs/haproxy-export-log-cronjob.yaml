@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: loki-log-exporter
+  name: haproxy-log-exporter
   namespace: prometheus
 spec:
   schedule: "0 */12 * * *"
@@ -10,15 +10,14 @@ spec:
       template:
         spec:
           containers:
-          - name: export-logs
+          - name: export-haproxy-logs
             image: public.ecr.aws/aws-cli/aws-cli:latest
             command:
               - /bin/sh
               - -c
               - |
-                yum install -y gzip jq && \
                 yum install -y zip gzip jq && \
-                /opt/export/export-loki-logs-to-s3.sh
+                /opt/export/export-haproxy-logs-to-s3.sh
             volumeMounts:
               - name: script-volume
                 mountPath: /opt/export
@@ -39,5 +38,5 @@ spec:
           volumes:
             - name: script-volume
               configMap:
-                name: loki-export-script
+                name: haproxy-export-configmap
                 defaultMode: 0755
